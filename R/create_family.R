@@ -275,7 +275,7 @@ createTrajectories <- function(object,host = '127.0.0.1',port=8080){
   validation(x = object)
 
   new_object <-
-    shiny::runApp(host = host,port=port,
+    shiny::runApp(host = host, port=port,
       shiny::shinyApp(
         ui = function(){
 
