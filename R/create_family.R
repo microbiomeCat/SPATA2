@@ -270,7 +270,7 @@ createSegmentation <- function(object,host = '127.0.0.1',port=8080){
 #' @export
 #'
 
-createTrajectories <- function(object,host = '127.0.0.1',port=8080){
+createTrajectories <- function(object, host = '127.0.0.1', port=8080){
 
   validation(x = object)
 
