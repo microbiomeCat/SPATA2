@@ -11,13 +11,13 @@
 #'
 #' @export
 
-createSegmentation <- function(object){
+createSegmentation <- function(object,host = '127.0.0.1',port=8080){
 
   check_object(object)
 
   ##----- launch application
   new_object <-
-    shiny::runApp(
+    shiny::runApp(host = host,port=port,
       shiny::shinyApp(ui = function(){
 
         shinydashboard::dashboardPage(
