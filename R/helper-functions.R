@@ -1415,6 +1415,8 @@ hlpr_summarize_trajectory_df <- function(object,
 
     }
 
+  }else{
+    shifted_df <- summarized_df
   }
 
   confuns::give_feedback(msg = "Done.", verbose = verbose)
