@@ -36,7 +36,7 @@ legendColor <- function(...){
 
 surfaceFrame <- function(object, of_sample = NA){
 
-  coords_df <- getCoordsDf(object)
+  coords_df <- getCoordsDf(object,of_sample=of_sample)
 
   list(
     ggplot2::scale_x_continuous(limits = base::range(coords_df$x)),

@@ -38,6 +38,7 @@ joinWith <- function(object,
                      smooth = FALSE,
                      smooth_span = NULL,
                      verbose = NULL,
+                     of_sample=of_sample,
                      normalize = NULL){
 
 # 1. Control --------------------------------------------------------------
@@ -68,13 +69,13 @@ joinWith <- function(object,
 
   if(base::is.character(input_list[["genes"]])){
 
-    input_list$genes <- check_genes(object, input_list$genes)
+    input_list$genes <- check_genes(object, input_list$genes,of_sample=of_sample)
 
   }
 
   if(base::is.character(input_list[["features"]])){
 
-    input_list$features <- check_features(object, input_list$features)
+    input_list$features <- check_features(object, input_list$features,of_sample=of_sample)
 
   }
 
@@ -116,7 +117,7 @@ joinWithFeatures <- function(object,
   check_smooth(df = spata_df, smooth = smooth, smooth_span = smooth_span)
 
   # adjusting check
-  features <- check_features(object, features = features)
+  features <- check_features(object, features = features, of_sample = base::unique(spata_df$sample))
 
   msg <-
     glue::glue(
@@ -207,7 +208,7 @@ joinWithGenes <- function(object,
 
   # adjusting check
   rna_assay <- getExpressionMatrix(object, of_sample = base::unique(spata_df$sample))
-  genes <- check_genes(object, genes = genes, rna_assay = rna_assay)
+  genes <- check_genes(object, genes = genes, rna_assay = rna_assay, of_sample = base::unique(spata_df$sample))
 
   # -----
 

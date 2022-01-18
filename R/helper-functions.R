@@ -562,19 +562,19 @@ hlpr_image_add_on2 <- function(image){
 #' @title Join with single value
 #'
 #' @export
-hlpr_join_with_color_by <- function(object, df, color_by, ...){
+hlpr_join_with_color_by <- function(object, df, color_by,of_sample =NA, ...){
 
-  if(isGene(object, color_by)){
+  if(isGene(object, color_by,of_sample = of_sample )){
 
-    df <- joinWith(object, df, genes = color_by, ...)
+    df <- joinWith(object, df, genes = color_by,of_sample = of_sample, ...)
 
-  } else if(isGeneSet(object, color_by)){
+  } else if(isGeneSet(object, color_by,of_sample = of_sample )){
 
     df <- joinWith(object, df, gene_set = color_by, ...)
 
-  } else if(isFeature(object, color_by)) {
+  } else if(isFeature(object, color_by,of_sample = of_sample )) {
 
-    df <- joinWith(object, df, features = color_by, ...)
+    df <- joinWith(object, df, features = color_by,of_sample = of_sample, ...)
 
   }
 
@@ -1277,7 +1277,7 @@ hlpr_summarize_trajectory_df <- function(object,
                                          whole_sample = FALSE,
                                          method_gs = "mean",
                                          verbose = TRUE,
-                                         normalize = FALSE){
+                                         normalize = NULL){
 
 
   # 1. Control --------------------------------------------------------------
@@ -1416,7 +1416,13 @@ hlpr_summarize_trajectory_df <- function(object,
     }
 
   }else{
-    shifted_df <- summarized_df
+      shifted_df <-
+        tidyr::pivot_longer(
+          data = summarized_df,
+          cols = dplyr::all_of(x = variables),
+          names_to = "variables",
+          values_to = "values"
+        )
   }
 
   confuns::give_feedback(msg = "Done.", verbose = verbose)

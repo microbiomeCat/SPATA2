@@ -826,11 +826,15 @@ plotTrajectoryHeatmap <- function(object,
                                   smooth_span = NULL,
                                   verbose = NULL,
                                   of_sample = NA,
+                                  normalize = NULL,
+                                  row_km = 2,
+                                  patterns = NULL,
                                   ...){
 
   # 1. Control --------------------------------------------------------------
 
-  # all checks
+  # all check 
+
   hlpr_assign_arguments(object)
   check_trajectory_binwidth(binwidth)
 
@@ -864,9 +868,12 @@ plotTrajectoryHeatmap <- function(object,
       ctdf = trajectory_object@compiled_trajectory_df,
       variables = variables[[1]],
       binwidth = binwidth,
+      normalize = normalize,
       verbose = verbose) %>%
     dplyr::ungroup()
 
+  tmp=dplyr::group_by(.data = stdf, {{var_type}})
+ 
   wide_tdf <-
     dplyr::group_by(.data = stdf, {{var_type}}) %>%
     dplyr::mutate(values = confuns::normalize(x = values)) %>%
@@ -877,7 +884,6 @@ plotTrajectoryHeatmap <- function(object,
                        values_from = "values")
 
   # -----
-
   # 3. Heatmap column split -------------------------------------------------
 
   # if the heatmap is to be splitted into the trajectory parts
@@ -964,12 +970,179 @@ plotTrajectoryHeatmap <- function(object,
                             verbose = verbose) %>% base::as.matrix()
 
   }
+  parts=c()
+  for(i in 1:length(gaps_col)){
+    parts=c(parts,rep(i,t=(gaps_col[i]-ifelse(i==1,0,gaps_col[i-1]))))
+  }
 
   # -----
+  col= c(	"#41B43F", "#0099B3", "#925E9F")[1:length(unique(parts))]
+  names(col)=unique(parts)
 
-  # Plot heatmap ------------------------------------------------------------
+  col_fun= circlize::colorRamp2(c(0, ncol(mtr_smoothed) ), c("white", "green"))
+  top_anno <- ComplexHeatmap::HeatmapAnnotation(
+      Region = parts,
+      Distance = 1:ncol(mtr_smoothed), 
+      col=list(Region=col,
+               Distance=col_fun),
+      simple_anno_size =  grid::unit(0.5, "cm"),
+      annotation_name_side = "left",
+      annotation_legend_param = list(
+          Distance = list(title = "Distance", 
+              direction = "horizontal",
+              legend_height = grid::unit(1, "cm"),
+              legend_wide= grid::unit(8, "cm"),
+              title_position = "topleft"),
+          Region = list(title = "Region", 
+              direction = "horizontal",
+              legend_height = grid::unit(1, "cm"),
+              legend_wide= grid::unit(3, "cm"),
+              title_position = "topleft")
+        )
+    ) # 设置字体
+  left_anno = ComplexHeatmap::rowAnnotation(
+      foo = ComplexHeatmap::anno_block(
+        gp = grid::gpar(fill = c("#00468B", "#EC0000","#41B43F", "#0099B3", "#925E9F", "#FDAE91", "#AC002A")[1:row_km])
+      )
+    )
 
-  pheatmap::pheatmap(
+  print(rownames(mtr_smoothed))
+  
+  max_dist=function(x,y){
+    return((order(x,decreasing=T)[10]-order(y,decreasing=T)[10])/length(x))
+  }
+  # Plot ::give_feedback(msg = "Done.")eatmap ------------------------------------------------------------
+  pdf(paste0("path_heatmap_",trajectory_name,".pdf"),
+          width=8,
+          height=10,
+        #  units="in",
+        #  res=600,
+          bg="white")
+  plot1=ComplexHeatmap::Heatmap(mtr_smoothed,
+          cluster_rows = TRUE,
+#          clustering_distance_rows=max_dist,
+#          clustering_method_rows = "complete",
+          name=" ",
+          row_km = row_km,
+          row_gap =  grid::unit(0, "mm"), 
+          border = FALSE,
+          cluster_columns = FALSE,
+          show_column_names = FALSE,
+          show_row_names = FALSE,
+          top_annotation = top_anno, # 在热图上边增加注释
+          left_annotation = left_anno,
+          column_title = NULL,
+          use_raster=TRUE,
+          #right_annotation = row_anno,
+          column_split = parts,
+          raster_by_magick = TRUE,
+          row_dend_width = grid::unit(20, "mm"),
+          heatmap_legend_param = list(
+              direction = "horizontal",
+              at = c(0, 0.4, 0.8),
+              labels = c("0", "0.4", "0.8"),
+              title = "Normalized Express levels",
+              legend_height = grid::unit(1, "cm"),
+              legend_width = grid::unit(8, "cm"), 
+              title_position = "topleft"
+              )
+          )
+  ComplexHeatmap::draw(plot1, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+    annotation_legend_side = "bottom")
+  dev.off()
+
+  pdf(paste0("path_heatmap_with_lable_",trajectory_name,".pdf"),
+          width=8,
+          height=10,
+       #   units="in",
+       #   res=600,
+          bg="white")
+  plot2=ComplexHeatmap::Heatmap(mtr_smoothed,
+          cluster_rows = TRUE,
+#          clustering_distance_rows=max_dist,
+#          clustering_method_rows = "average",
+          name=" ",
+          row_km = row_km,
+          row_gap =  grid::unit(0, "mm"), 
+          border = FALSE,
+          cluster_columns = FALSE,
+          show_column_names = FALSE,
+          show_row_names = TRUE,
+          row_names_gp=grid::gpar(fontsize = 6),
+          top_annotation = top_anno, # 在热图上边增加注释
+          left_annotation = left_anno,
+          column_title = NULL,
+          use_raster=TRUE,
+          #right_annotation = row_anno,
+          column_split = parts,
+          raster_by_magick = TRUE,
+          row_dend_width = grid::unit(20, "mm"),
+          heatmap_legend_param = list(
+              direction = "horizontal",
+              at = c(0, 0.4, 0.8),
+              labels = c("0", "0.4", "0.8"),
+              title = "Normalized Express levels",
+              legend_height = grid::unit(1, "cm"),
+              legend_width = grid::unit(8, "cm"), 
+              title_position = "topleft"
+              )
+          )
+  ComplexHeatmap::draw(plot2, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+    annotation_legend_side = "bottom")
+  dev.off()
+
+if(!is.null(patterns)){
+  mtr_smoothed <- as.matrix(rbind(as.data.frame(mtr_smoothed)[names(patterns)[which(patterns=="ascending")],],
+                        as.data.frame(mtr_smoothed)[names(patterns)[which(patterns=="peak")],],
+                        as.data.frame(mtr_smoothed)[names(patterns)[which(patterns=="descending")],],
+                        as.data.frame(mtr_smoothed)[names(patterns)[which(patterns=="others")],]
+                        ))
+  left_anno = ComplexHeatmap::rowAnnotation(pattern = patterns[rownames(mtr_smoothed)],
+    col = list(pattern = c("ascending" = "#00468B", "descending" = "#EC0000","peak" = "#41B43F","others"="#0099B3")))
+}else{
+  left_anno=FALSE
+}
+  pdf(paste0("path_heatmap_no_tree_w_lable_",trajectory_name,".pdf"),
+          width=8,
+          height=10,
+       #   units="in",
+       #   res=600,
+          bg="white")
+  plot3=ComplexHeatmap::Heatmap(mtr_smoothed,
+          cluster_rows = FALSE,
+#          clustering_distance_rows=max_dist,
+#          clustering_method_rows = "average",
+          name=" ",
+#          row_km = row_km,
+          row_gap =  grid::unit(0, "mm"), 
+          border = FALSE,
+          cluster_columns = FALSE,
+          show_column_names = FALSE,
+          show_row_names = TRUE,
+          row_names_gp=grid::gpar(fontsize = 6),
+          top_annotation = top_anno, # 在热图上边增加注释
+          left_annotation = left_anno,
+          column_title = NULL,
+          use_raster=TRUE,
+          #right_annotation = row_anno,
+          column_split = parts,
+          raster_by_magick = TRUE,
+          row_dend_width = grid::unit(20, "mm"),
+          heatmap_legend_param = list(
+              direction = "horizontal",
+              at = c(0, 0.4, 0.8),
+              labels = c("0", "0.4", "0.8"),
+              title = "Normalized Express levels",
+              legend_height = grid::unit(1, "cm"),
+              legend_width = grid::unit(8, "cm"), 
+              title_position = "topleft"
+              )
+          )
+  ComplexHeatmap::draw(plot3, merge_legend = TRUE, heatmap_legend_side = "bottom", 
+    annotation_legend_side = "bottom")
+  dev.off()
+
+  plot=pheatmap::pheatmap(
     mat = mtr_smoothed,
     cluster_cols = FALSE,
     cluster_rows = FALSE,
@@ -979,7 +1152,7 @@ plotTrajectoryHeatmap <- function(object,
     show_rownames = show_rownames,
     ...
   )
-
+  return(plot)
   # -----
 
 

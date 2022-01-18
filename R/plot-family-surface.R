@@ -97,6 +97,7 @@ plotSurface <- function(object,
       normalize = normalize,
       smooth = smooth,
       smooth_span = smooth_span,
+      of_sample = of_sample,
       verbose = verbose
     )
 
@@ -130,7 +131,7 @@ plotSurface <- function(object,
 
   }
 
-  color_var <- pull_var(coords_df, color_by)
+  color_var <- confuns::pull_var(coords_df, color_by)
 
   if(base::is.numeric(color_var)){
 
@@ -158,7 +159,7 @@ plotSurface <- function(object,
     point_add_on +
     scale_color_add_on(
       aes = "color",
-      variable = pull_var(coords_df, color_by),
+      variable = confuns::pull_var(coords_df, color_by),
       clrp = pt_clrp,
       clrsp = pt_clrsp,
       clrp.adjust = clrp_adjust
@@ -220,12 +221,12 @@ plotSurface2 <- function(coords_df,
 
 #' @rdname plotSurface
 #' @export
-plotSurfaceInteractive <- function(object){
+plotSurfaceInteractive <- function(object,host = '127.0.0.1',  port=8080){
 
   check_object(object)
 
   surface_plots <-
-    shiny::runApp(
+    shiny::runApp(host = host, port=port,
       shiny::shinyApp(
         ui = function(){
 
@@ -418,7 +419,7 @@ plotSurfaceAverage <- function(object,
 
   hlpr_assign_arguments(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   if(confuns::is_list(input = color_by)){
 
@@ -652,7 +653,7 @@ plotSurfaceQuantiles <- function(object,
 
   hlpr_assign_arguments(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   confuns::is_value(x = color_by, mode = "character")
   confuns::is_value(x = n_qntls, mode = "numeric")

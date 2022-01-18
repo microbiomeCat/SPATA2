@@ -12,7 +12,7 @@
 #' (and \emph{segmentation} in case of \code{getSegmentDf()}).
 #' @export
 
-getCoordsDf <- function(object, of_sample = NA){
+getCoordsDf <- function(object, of_sample = ""){
 
   # 1. Control --------------------------------------------------------------
 
@@ -43,7 +43,7 @@ getSegmentDf <- function(object, segment_names, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object = object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length  = 1)
 
   confuns::is_vec(segment_names, mode = "character")
 
@@ -241,11 +241,11 @@ getDeaGenes <- function(object,
 #' @return Character value.
 #' @export
 
-getActiveMatrixName <- function(object, of_sample = NA){
+getActiveMatrixName <- function(object, of_sample = ""){
 
   check_object(object)
 
-  of_sample <- check_sample(object = object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length  = 1)
 
   object@information$active_mtr[[of_sample]]
 
@@ -263,7 +263,7 @@ getActiveMatrixName <- function(object, of_sample = NA){
 
 getMatrix <- function(object, mtr_name, of_sample = NA){
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length = 1)
 
   object@data[[of_sample]][[mtr_name]]
 
@@ -280,7 +280,7 @@ getExpressionMatrix <- function(object,
   check_object(object)
 
   # adjusting control
-  of_sample <- check_sample(object = object, of_sample = of_sample)
+  of_sample <- check_sample(object = object, of_sample = of_sample,desired_length  = 1)
 
   if(base::is.null(mtr_name)){
 
@@ -302,15 +302,13 @@ getExpressionMatrix <- function(object,
 
     }
 
-    active_mtr <- mtr_name
-
+    active_mtr <- mtr_name # is a list, which may cause trouble
   }
 
-  confuns::give_feedback(msg = glue::glue("Using expression matrix '{active_mtr}'."), verbose = verbose)
+  confuns::give_feedback(msg = glue::glue("Using expression matrix  '{active_mtr}'."), verbose = verbose)
 
   expr_mtr <-
-    object@data[[of_sample]][[active_mtr]] %>%
-    base::as.matrix()
+    object@data[[as.character(of_sample)]][[as.character(active_mtr)]] %>% base::as.matrix()
 
   return(expr_mtr)
 
@@ -350,7 +348,7 @@ getExpressionMatrixNames <- function(object, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object = object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length  = 1)
 
   mtr_names <-
     object@data[[of_sample]] %>% base::names() %>%
@@ -563,7 +561,7 @@ getBarcodes <- function(object,
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample, desired_length  = 1)
 
 
   # if variable is specified
@@ -634,7 +632,7 @@ getFeatureNames <- function(object, of_class = NULL, of_sample = NA){
   check_object(object)
   confuns::is_vec(x = of_class, mode = "character", skip.allow = TRUE, skip.val = NULL)
 
-  of_sample <- check_sample(object = object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length  = 1)
 
   feature_df <- getFeatureDf(object = object, of_sample = of_sample)
 
@@ -766,7 +764,7 @@ getFeatureValues <- function(object, features, of_sample = NA){
   check_object(object)
   features <- check_features(object, features, valid_classes = c("character", "factor"))
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   # -----
 
@@ -847,7 +845,7 @@ getGroupNames <- function(object, discrete_feature, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample, desired_length  = 1)
 
   confuns::is_value(discrete_feature, mode = "character")
 
@@ -986,7 +984,7 @@ getGeneCounts <- function(object, of_sample = NA, return = "tibble"){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   gene_counts <-
     getCountMatrix(object, of_sample = of_sample) %>%
@@ -1023,7 +1021,7 @@ getGeneFeatureNames <- function(object, mtr_name = NULL, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object = object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length  = 1)
 
   gmdf <- getGeneMetaDf(object = object,
                         mtr_name = mtr_name,
@@ -1049,7 +1047,7 @@ getGeneFeatureNames <- function(object, mtr_name = NULL, of_sample = NA){
 getGeneMetaData <- function(object, mtr_name = NULL, only_df = FALSE, of_sample = NA){
 
   check_object(object)
-  of_sample <- check_sample(object = object, of_sample = of_sample)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length  = 1)
 
   if(base::is.null(mtr_name)){
 
@@ -1104,7 +1102,7 @@ getImage <- function(object, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   object@images[[of_sample]]
 
@@ -1250,7 +1248,7 @@ getPrResults <- function(object, method_pr = "hspa", of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   pr_list <-
     object@spatial[[of_sample]][[method_pr]]
@@ -1295,7 +1293,7 @@ getGeneDistMtr <- function(object, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   sp_cor <- getSpCorResults(object, of_sample = of_sample)
 
@@ -1324,7 +1322,7 @@ getSpCorCluster <- function(object, method_hclust = "complete", of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   sp_cor <-
     getSpCorResults(object, of_sample = of_sample)
@@ -1348,7 +1346,7 @@ getSpCorClusterNames <- function(object, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   sp_cor <- getSpCorResults(object, of_sample = of_sample)
 
@@ -1376,7 +1374,7 @@ getSpCorResults <- function(object, of_sample = NA){
 
   check_object(object)
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   corr_assessment <-
     object@spatial[[of_sample]]$correlation
@@ -1624,7 +1622,7 @@ getTrajectoryObject <- function(object, trajectory_name, of_sample = NA){
 #'
 #' @export
 
-getGeneSets <- function(object, of_class = "all", index = NULL, simplify = TRUE){
+getGeneSets <- function(object, of_class = "all", index = NULL, of_sample = NA, simplify = TRUE){
 
   # 1. Control --------------------------------------------------------------
 
@@ -1892,7 +1890,7 @@ getGenes <- function(object,
                        skip.allow = TRUE, skip.val = NULL)
 
   # adjusting check
-  of_sample <- check_sample(object = object, of_sample = of_sample)
+  of_sample <- check_sample(object = object, of_sample = of_sample, desired_length = 1)
 
   # -----
 

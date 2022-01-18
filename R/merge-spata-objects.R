@@ -26,7 +26,7 @@ mergeSpataObjects <- function(objects, gsdf_input = NULL, verbose = TRUE){
 
   object_list <-
     purrr::keep(.x = objects,
-                .p = ~ methods::is(object = .x, class2 = "spata"))
+                .p = ~ methods::is(object = .x, class2 = "spata2"))
 
   sample_names <-
     purrr::map(.x = objects, .f = ~ getSampleNames(object = .x)) %>%
@@ -38,7 +38,7 @@ mergeSpataObjects <- function(objects, gsdf_input = NULL, verbose = TRUE){
 
   } else {
 
-    merged_object <- methods::new("spata", samples = sample_names)
+    merged_object <- methods::new("spata2", samples = sample_names)
 
   }
 
@@ -65,6 +65,11 @@ mergeSpataObjects <- function(objects, gsdf_input = NULL, verbose = TRUE){
     purrr::map(.x = objects, .f = ~ .x@fdata) %>%
     purrr::flatten() %>%
     purrr::set_names(nm = getSampleNames(merged_object))
+  
+  merged_object@gdata <-
+    purrr::map(.x = objects, .f = ~ .x@gdata) %>%
+    purrr::flatten() %>%
+    purrr::set_names(nm = getSampleNames(merged_object))
 
   merged_object@images <-
     purrr::map(.x = objects, .f = ~ .x@images) %>%
@@ -78,11 +83,14 @@ mergeSpataObjects <- function(objects, gsdf_input = NULL, verbose = TRUE){
   merged_object@information <-
     list("active_mtr" = purrr::map(.x = information_list, .f = "active_mtr"),
          "autoencoder" = purrr::map(.x = information_list, .f = "autoencoder"),
-         "barcodes" = purrr::map(.x = information_list, .f = "barcodes"))
+         "barcodes" = purrr::map(.x = information_list, .f = "barcodes"),
+         "instructions" = purrr::map(.x = information_list, .f = "instructions")
+
+         )
 
   merged_object@scvelo <-
-    purrr::set_names(x = base::vector(mode = "list"), length = base::length(getSampleNames(merged_object)),
-                     nm = getSampleNames(object))
+    purrr::set_names(x = base::vector(mode = "list", length = base::length(getSampleNames(merged_object))),
+                     nm = getSampleNames(merged_object))
 
   merged_object@trajectories <-
     purrr::map(.x = objects, .f = ~ .x@trajectories) %>%

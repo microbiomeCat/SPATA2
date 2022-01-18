@@ -1,7 +1,7 @@
 #' @export
-isGene <- function(object, gene){
+isGene <- function(object, gene,of_sample = NA){
 
-  genes <- getGenes(object)
+  genes <- getGenes(object,of_sample =of_sample )
 
   out <- gene %in% genes
 
@@ -10,9 +10,9 @@ isGene <- function(object, gene){
 }
 
 #' @export
-isGeneSet <- function(object, gene_set){
+isGeneSet <- function(object, gene_set,of_sample = NA){
 
-  gene_sets <- getGeneSets(object)
+  gene_sets <- getGeneSets(object,of_sample =of_sample )
 
   out <- gene_set %in% gene_sets
 
@@ -21,9 +21,9 @@ isGeneSet <- function(object, gene_set){
 }
 
 #' @export
-isFeature <- function(object, feature){
+isFeature <- function(object, feature,of_sample = NA){
 
-  features <- getFeatureNames(object)
+  features <- getFeatureNames(object,of_sample =of_sample )
 
   out <- feature %in% features
 

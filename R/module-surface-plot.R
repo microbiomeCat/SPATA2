@@ -129,9 +129,9 @@ moduleSurfacePlotServer <- function(id,
       reset_select_gene_sets <- shiny::reactiveVal(value = 0)
       reset_select_genes <- shiny::reactiveVal(value = 0)
 
-      all_features <- getFeatureNames(object) %>% base::unname()
+      all_features <- getFeatureNames(object,of_sample = "") %>% base::unname()
       all_gene_sets <- getGeneSets(object = object)
-      all_genes <- getGenes(object = object, in_sample = "all")
+      all_genes <- getGenes(object = object, of_sample =  "")
 
       smooth_values <- base::seq(0.01, 0.25, by = 0.01) %>%
         base::round(digits = 3) %>%
@@ -861,6 +861,7 @@ moduleSurfacePlotServer <- function(id,
         segm_df <- joinWith(object = reactive_object(),
                             spata_df = getCoordsDf(reactive_object(), current$sample),
                             features = "segmentation",
+                            of_sample=current$sample,
                             verbose = FALSE) %>%
           dplyr::filter(!segmentation %in% c("none", ""))
 

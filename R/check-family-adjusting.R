@@ -266,6 +266,7 @@ check_genes <- function(object,
                         rna_assay = NULL,
                         max_length = NULL,
                         fdb_fn = "warning",
+                        of_sample=of_sample,
                         ...){
 
   # 1. Control --------------------------------------------------------------
@@ -453,7 +454,7 @@ check_gene_sets <- function(object,
 
 check_pattern <- function(object, patterns = "", method_pr = "hotspot", of_sample = NA){
 
-  of_sample <- check_sample(object, of_sample = of_sample, of.length = 1)
+  of_sample <- check_sample(object, of_sample = of_sample, desired_length  = 1)
 
   names_pattern <- getPatternNames(object, method_pr = method_pr)
 
@@ -500,9 +501,9 @@ check_sample <- function(object,
 
 
   # 0. Default sample -------------------------------------------------------
-
-  # 'of_sample' is currently not in use
-  if(FALSE){
+  if(is.na(of_sample)){of_sample=""}
+  # 'of_sample' is currently not in use # LHY opened this
+  if(TRUE){
 
   confuns::is_vec(of_sample, mode = "character", ...)
 
@@ -557,6 +558,15 @@ check_sample <- function(object,
 
       base::warning(glue::glue("Did not find {n_not_found} {ref}: {not_found}"))
 
+    }else{
+
+        if(!base::is.null(desired_length) && base::length(of_sample) != desired_length){
+
+        stop(stringr::str_c("Number of samples specified needs to be: ", desired_length, ". ",
+            sep = ""))
+        }
+
+        base::return(of_sample)
     }
 
   }
