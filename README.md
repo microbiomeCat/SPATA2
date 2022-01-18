@@ -1,4 +1,12 @@
 # SPATA2
+
+I modified some functions to make the function **plotSurfaceInteractive** can be used for multi-sample merged spata_obj (by **mergeSpataObjects**).
+You may need to used the following script to modify the multi-sample merged spata2 object:
+```
+combind.spata@information$instructions=combind.spata@information$instructions[[1]]
+```
+However, these changes may cause the fail of the other functions (not tested) . 
+
 A Toolbox for Spatial Gene Expression Analysis
 
 For detailed tutorials and examples click on the link below:
